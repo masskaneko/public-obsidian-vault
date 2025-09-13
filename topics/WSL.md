@@ -24,7 +24,7 @@ fcitx-autostart &> /dev/null
 </fontconfig>
 ```
 
-
+fcitx-configtool でMOZCを追加
 
 https://www.aise.ics.saitama-u.ac.jp/~gotoh/GeditInUbuntuonWSL2InWin11.html
 
