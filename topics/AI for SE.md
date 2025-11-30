@@ -4,4 +4,5 @@
 - https://tech.legalforce.co.jp/entry/qaprocess-ai-toolkit
 - https://zenn.dev/medley/articles/26a8a5d2c8175f
 - https://www.itmedia.co.jp/aiplus/spv/2508/27/news094.html
+- https://arxiv.org/abs/2510.12399
 
