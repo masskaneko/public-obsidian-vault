@@ -80,3 +80,9 @@ $ cat /sys/class/graphics/fb1/virtual_size
 480,320
 ```
 
+
+- 解像度: **480 × 320**
+- 色深度: **16bit**
+- フォーマット: **RGB565**
+- framebuffer: `/dev/fb1`
+
