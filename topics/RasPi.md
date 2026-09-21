@@ -61,3 +61,22 @@ $ cat /proc/fb
 0 BCM2708 FB
 1 fb_ili9486
 ```
+
+
+```
+$ fbset -fb /dev/fb1
+
+mode "480x320"
+geometry 480 320 480 320 16
+timings 0 0 0 0 0 0 0
+nonstd 1
+rgba 5/11,6/5,5/0,0/0
+endmode
+
+$ cat /sys/class/graphics/fb1/bits_per_pixel
+16
+
+$ cat /sys/class/graphics/fb1/virtual_size
+480,320
+```
+
