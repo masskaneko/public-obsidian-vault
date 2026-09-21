@@ -1,8 +1,25 @@
 
 
 ## 3a+ に Osoyoo 3.5 インチディスプレイをつなげて
+服や装飾品を
 久々のRasPiとして本体3a+, Osoyooの3.5インチディスプレイを買った。
-デスクトップUIは使わないので64bit lite trixie をインストール。
+デスクトップUIは使わないので64bit lite を選択。
+
+
+```
+$ cat /etc/os-release
+PRETTY_NAME="Debian GNU/Linux 13 (trixie)"
+NAME="Debian GNU/Linux"
+VERSION_ID="13"
+VERSION="13 (trixie)"
+VERSION_CODENAME=trixie
+DEBIAN_VERSION_FULL=13.7
+ID=debian
+HOME_URL="https://www.debian.org/"
+SUPPORT_URL="https://www.debian.org/support"
+BUG_REPORT_URL="https://bugs.debian.org/"
+```
+
 と、ここでOsoyooのドライバーはX11前提らしい。
 https://osoyoo.com/ja/2026/01/29/rpi3-osoyoo-3-5-spi-screen-trixie-bookworm-system-complete-configuration-guide/
 
