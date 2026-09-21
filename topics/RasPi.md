@@ -32,7 +32,6 @@ $ sudo nano /boot/firmware/config.txt
 追加
 ```
 # ========== Osoyoo 3.5 SPI Screen ==========
-dtparam=spi=on
 dtoverlay=osoyoo35b:speed=20000000
 hdmi_force_hotplug=1
 max_usb_current=1
@@ -43,3 +42,11 @@ hdmi_cvt 480 320 60 6 0 0 0
 hdmi_drive=2
 display_rotate=2
 ```
+
+SPI                 ON
+VC4 KMS             OFF
+Osoyoo overlay      ON
+LCD解像度            480x320
+LCD rotation        2
+SPI speed           20MHz
+
