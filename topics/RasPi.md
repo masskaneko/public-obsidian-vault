@@ -86,3 +86,23 @@ $ cat /sys/class/graphics/fb1/virtual_size
 - フォーマット: **RGB565**
 - framebuffer: `/dev/fb1`
 
+Python からフレームバッファーに書き込み画面全体を赤くする。
+```
+import struct
+
+WIDTH = 480
+HEIGHT = 320
+FB = "/dev/fb1"
+
+def rgb565(r, g, b):
+    return ((r >> 3) << 11) | ((g >> 2) << 5) | (b >> 3)
+
+# 画面全体を赤にする
+pixel = struct.pack("<H", rgb565(255, 0, 0))
+frame = pixel * (WIDTH * HEIGHT)
+
+with open(FB, "wb") as f:
+    f.write(frame)
+
+print("done")
+```
