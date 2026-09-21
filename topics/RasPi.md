@@ -97,7 +97,6 @@ FB = "/dev/fb1"
 def rgb565(r, g, b):
     return ((r >> 3) << 11) | ((g >> 2) << 5) | (b >> 3)
 
-# 画面全体を赤にする
 pixel = struct.pack("<H", rgb565(255, 0, 0))
 frame = pixel * (WIDTH * HEIGHT)
 
