@@ -127,3 +127,5 @@ with open(FB, "wb") as f:
 
 print("done")
 ```
+
+画面全体が赤くなった。
