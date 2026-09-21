@@ -12,4 +12,10 @@ Interface Options > SPI
 
 $ sudo apt update
 
-$ sudo apt 
+$ sudo apt install unzip -y
+
+$ wget https://osoyoo.com/driver/osoyoo35b.zip
+
+$ unzip osoyoo35b.zip
+
+$ sudo cp osoyoo35b.dtbo /boot/firmware/overlays/
