@@ -346,7 +346,36 @@ FPS は 17-23 に。まぁまぁよくなった。が、まだ物足りない。
 `Image.Resampling.LANCZOS` から `Image.Resampling.NEAREST` にしてはどうかとのこと。
 元 gif からの変換は怪しいところ。やってみる。
 
+```bash
+$ python3 ./lcd_gif_numpy.py gifs/60fps-parrot.gif
+GIF : gifs/60fps-parrot.gif
+size : (128, 128)
+frames : 20
+frame= 17
+FPS= 20.5
 
+$ python3 ./lcd_gif_numpy.py gifs/question.gif
+GIF : gifs/question.gif
+size : (50, 50)
+frames : 53
+frame= 51
+FPS= 28.2 
+
+$ python3 ./lcd_gif_numpy.py gifs/party-skeleton.gif
+GIF : gifs/party-skeleton.gif
+size : (112, 112)
+frames : 55
+frame= 2
+FPS= 30.1
+
+$ python3 ./lcd_gif_numpy.py gifs/giphy-angel.gif
+GIF    : gifs/giphy-angel.gif
+size   : (96, 96)
+frames : 48
+frame=  33  FPS= 17.2
+```
+
+速度はよくなった。画質はちょい悪くなった。
 
 
 ## 文字をディスプレイに表示する
