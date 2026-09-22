@@ -153,6 +153,86 @@ $ python3 ~/bench_convert.py
 conversion FPS: 2.03
 ```
 
+おっそ。
+
+フレームバッファーへの書き込みも測る。
+```python
+import time
+
+WIDTH = 480
+HEIGHT = 320
+
+data = bytes(WIDTH * HEIGHT * 2)
+
+with open("/dev/fb1", "wb") as fb:
+    start = time.monotonic()
+
+    for _ in range(100):
+        fb.seek(0)
+        fb.write(data)
+
+    fb.flush()
+
+elapsed = time.monotonic() - start
+
+print(f"100 writes: {elapsed:.3f} sec")
+print(f"write FPS: {100 / elapsed:.2f}")
+PY
+```
+
+```bash
+$ python3 ~/bench_fb.py
+100 writes: 0.008 sec
+write FPS: 13037.58
+```
+
+こっちは問題ない。
+
+さてどう速くするか。助けてGPT。
+「NumPyを使いましょう」そうなのか。
+```bash
+sudo apt install python3-numpy
+```
+
+```python
+from PIL import Image
+import numpy as np
+import time
+
+WIDTH = 480
+HEIGHT = 320
+
+image = Image.new("RGB", (WIDTH, HEIGHT), "red")
+
+
+def image_to_rgb565(image):
+    rgb = np.asarray(image.convert("RGB"), dtype=np.uint16)
+
+    r = rgb[:, :, 0]
+    g = rgb[:, :, 1]
+    b = rgb[:, :, 2]
+
+    rgb565 = (
+        ((r >> 3) << 11) |
+        ((g >> 2) << 5) |
+        (b >> 3)
+    )
+
+    return rgb565.astype("<u2").tobytes()
+
+
+start = time.monotonic()
+
+for _ in range(100):
+    image_to_rgb565(image)
+
+elapsed = time.monotonic() - start
+
+print(f"100 conversions: {elapsed:.3f} sec")
+print(f"conversion FPS: {100 / elapsed:.2f}")
+PY
+```
+
 ## 文字をディスプレイに表示する
 ```bash
 $ sudo apt install fonts-noto-core fonts-noto-cjk
