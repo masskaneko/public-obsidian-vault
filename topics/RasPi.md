@@ -233,6 +233,109 @@ print(f"conversion FPS: {100 / elapsed:.2f}")
 PY
 ```
 
+```bash
+$ python3 ~/bench_convert_numpy.py
+100 conversions: 1.257 sec
+conversion FPS: 79.56
+```
+
+劇的。さっきのgif描画に適用する。
+
+```python
+from PIL import Image
+import numpy as np
+import sys
+import time
+
+WIDTH = 480
+HEIGHT = 320
+FB = "/dev/fb1"
+
+
+def image_to_rgb565(image):
+    rgb = np.asarray(image.convert("RGB"), dtype=np.uint16)
+
+    r = rgb[:, :, 0]
+    g = rgb[:, :, 1]
+    b = rgb[:, :, 2]
+
+    rgb565 = (
+        ((r >> 3) << 11) |
+        ((g >> 2) << 5) |
+        (b >> 3)
+    )
+
+    return rgb565.astype("<u2").tobytes()
+
+
+def play_gif(filename):
+    gif = Image.open(filename)
+
+    n_frames = getattr(gif, "n_frames", 1)
+
+    print(f"GIF    : {filename}")
+    print(f"size   : {gif.size}")
+    print(f"frames : {n_frames}")
+
+    fps_count = 0
+    fps_start = time.monotonic()
+
+    with open(FB, "wb") as fb:
+
+        while True:
+
+            for frame_no in range(n_frames):
+
+                gif.seek(frame_no)
+
+                image = gif.convert("RGB")
+
+                if image.size != (WIDTH, HEIGHT):
+                    image = image.resize(
+                        (WIDTH, HEIGHT),
+                        Image.Resampling.LANCZOS
+                    )
+
+                data = image_to_rgb565(image)
+
+                fb.seek(0)
+                fb.write(data)
+
+                fps_count += 1
+
+                now = time.monotonic()
+
+                if now - fps_start >= 1.0:
+                    fps = fps_count / (now - fps_start)
+
+                    print(
+                        f"\rframe={frame_no:4d}  "
+                        f"FPS={fps:5.1f}",
+                        end="",
+                        flush=True
+                    )
+
+                    fps_count = 0
+                    fps_start = now
+
+                delay = gif.info.get("duration", 100) / 1000
+
+                if delay > 0:
+                    time.sleep(delay)
+
+
+if __name__ == "__main__":
+
+    if len(sys.argv) != 2:
+        print(f"Usage: sudo python3 {sys.argv[0]} GIF")
+        sys.exit(1)
+
+    play_gif(sys.argv[1])
+PY
+```
+
+
+
 ## 文字をディスプレイに表示する
 ```bash
 $ sudo apt install fonts-noto-core fonts-noto-cjk
