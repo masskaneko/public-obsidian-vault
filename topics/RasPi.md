@@ -380,7 +380,6 @@ frame=  33  FPS= 17.2
 そういえば毎フレームRGB565変換している。あほだ。なおそう。
 
 ```python
-cat > ~/lcd_gif_cached.py <<'PY'
 from PIL import Image
 import numpy as np
 import sys
@@ -487,6 +486,8 @@ if __name__ == "__main__":
 
     play(frames, durations)
 ```
+
+けっこうよくなった。
 
 
 ## 文字をディスプレイに表示する
