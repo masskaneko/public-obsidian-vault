@@ -3,6 +3,156 @@
 
 チャット用Gifアニメーションを https://www.animatedemojis.com/ で入手。
 
+gifファイルパスを指定して表示させる。
+
+```python
+from PIL import Image
+import sys
+import time
+
+WIDTH = 480
+HEIGHT = 320
+FB = "/dev/fb1"
+
+
+def image_to_rgb565(image):
+    image = image.convert("RGB")
+    pixels = image.load()
+
+    data = bytearray(WIDTH * HEIGHT * 2)
+
+    i = 0
+    for y in range(HEIGHT):
+        for x in range(WIDTH):
+            r, g, b = pixels[x, y]
+
+            value = ((r >> 3) << 11) | \
+                    ((g >> 2) << 5) | \
+                    (b >> 3)
+
+            data[i] = value & 0xff
+            data[i + 1] = value >> 8
+            i += 2
+
+    return data
+
+
+def play_gif(filename):
+    gif = Image.open(filename)
+
+    print(f"GIF: {filename}")
+    print(f"size: {gif.size}")
+    print(f"frames: {getattr(gif, 'n_frames', 1)}")
+
+    with open(FB, "wb") as fb:
+        frame = 0
+
+        while True:
+            try:
+                gif.seek(frame)
+            except EOFError:
+                frame = 0
+                continue
+
+            image = gif.convert("RGB")
+
+            # LCDいっぱいに表示
+            image = image.resize(
+                (WIDTH, HEIGHT),
+                Image.Resampling.LANCZOS
+            )
+
+            data = image_to_rgb565(image)
+
+            start = time.monotonic()
+
+            fb.seek(0)
+            fb.write(data)
+            fb.flush()
+
+            elapsed = time.monotonic() - start
+
+            delay_ms = gif.info.get("duration", 100)
+            if delay_ms < 10:
+                delay_ms = 10
+
+            # 転送にかかった時間を考慮
+            remaining = delay_ms / 1000 - elapsed
+            if remaining > 0:
+                time.sleep(remaining)
+
+            frame += 1
+
+            if frame >= getattr(gif, "n_frames", 1):
+                frame = 0
+
+
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print(f"Usage: sudo python3 {sys.argv[0]} GIF")
+        sys.exit(1)
+
+    play_gif(sys.argv[1])
+```
+
+
+```bash
+sudo python3 ~/lcd_gif.py gifs/question.gif
+```
+
+なかなか遅い。本来の1/10程度ではないか。
+
+RGB565変換が遅いのを疑い確かめる。
+```python
+from PIL import Image
+import time
+
+WIDTH = 480
+HEIGHT = 320
+
+image = Image.new("RGB", (WIDTH, HEIGHT), "red")
+
+
+def image_to_rgb565(image):
+    image = image.convert("RGB")
+    pixels = image.load()
+
+    data = bytearray(WIDTH * HEIGHT * 2)
+
+    i = 0
+    for y in range(HEIGHT):
+        for x in range(WIDTH):
+            r, g, b = pixels[x, y]
+
+            value = ((r >> 3) << 11) | \
+                    ((g >> 2) << 5) | \
+                    (b >> 3)
+
+            data[i] = value & 0xff
+            data[i + 1] = value >> 8
+            i += 2
+
+    return data
+
+
+start = time.monotonic()
+
+for _ in range(100):
+    image_to_rgb565(image)
+
+elapsed = time.monotonic() - start
+
+print(f"100 conversions: {elapsed:.3f} sec")
+print(f"conversion FPS: {100 / elapsed:.2f}")
+PY
+```
+
+```bash
+$ python3 ~/bench_convert.py
+100 conversions: 49.325 sec
+conversion FPS: 2.03
+```
+
 ## 文字をディスプレイに表示する
 ```bash
 $ sudo apt install fonts-noto-core fonts-noto-cjk
