@@ -377,6 +377,117 @@ frame=  33  FPS= 17.2
 
 速度はよくなった。画質はちょい悪くなった。
 
+そういえば毎フレームRGB565変換している。あほだ。なおそう。
+
+```python
+cat > ~/lcd_gif_cached.py <<'PY'
+from PIL import Image
+import numpy as np
+import sys
+import time
+
+WIDTH = 480
+HEIGHT = 320
+FB = "/dev/fb1"
+
+
+def image_to_rgb565(image):
+    rgb = np.asarray(image.convert("RGB"), dtype=np.uint16)
+
+    r = rgb[:, :, 0]
+    g = rgb[:, :, 1]
+    b = rgb[:, :, 2]
+
+    rgb565 = (
+        ((r >> 3) << 11) |
+        ((g >> 2) << 5) |
+        (b >> 3)
+    )
+
+    return rgb565.astype("<u2").tobytes()
+
+
+def load_gif(filename):
+    gif = Image.open(filename)
+
+    frames = []
+    durations = []
+
+    print(f"GIF    : {filename}")
+    print(f"size   : {gif.size}")
+    print(f"frames : {gif.n_frames}")
+
+    start = time.monotonic()
+
+    for frame_no in range(gif.n_frames):
+        gif.seek(frame_no)
+
+        image = gif.convert("RGB")
+
+        if image.size != (WIDTH, HEIGHT):
+            image = image.resize(
+                (WIDTH, HEIGHT),
+                Image.Resampling.NEAREST
+            )
+
+        frames.append(image_to_rgb565(image))
+        durations.append(gif.info.get("duration", 100))
+
+    elapsed = time.monotonic() - start
+
+    memory_mb = sum(len(x) for x in frames) / 1024 / 1024
+
+    print(f"preparation: {elapsed:.2f} sec")
+    print(f"memory    : {memory_mb:.1f} MB")
+
+    return frames, durations
+
+
+def play(frames, durations):
+    with open(FB, "wb") as fb:
+
+        count = 0
+        start = time.monotonic()
+
+        while True:
+            for data, duration in zip(frames, durations):
+
+                frame_start = time.monotonic()
+
+                fb.seek(0)
+                fb.write(data)
+
+                count += 1
+
+                now = time.monotonic()
+
+                if now - start >= 1.0:
+                    fps = count / (now - start)
+                    print(f"\rFPS={fps:5.1f}", end="", flush=True)
+
+                    count = 0
+                    start = now
+
+                elapsed = time.monotonic() - frame_start
+                remaining = duration / 1000 - elapsed
+
+                if remaining > 0:
+                    time.sleep(remaining)
+
+
+if __name__ == "__main__":
+
+    if len(sys.argv) != 2:
+        print(f"Usage: sudo python3 {sys.argv[0]} GIF")
+        sys.exit(1)
+
+    frames, durations = load_gif(sys.argv[1])
+
+    print("Playing...")
+
+    play(frames, durations)
+```
+
 
 ## 文字をディスプレイに表示する
 ```bash
