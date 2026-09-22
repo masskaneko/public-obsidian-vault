@@ -3,6 +3,67 @@
 
 チャット用Gifアニメーションを https://www.animatedemojis.com/ で入手。
 
+## 文字をディスプレイに表示する
+```bash
+$ sudo apt install fonts-noto-core fonts-noto-cjk
+```
+
+```python
+from PIL import Image, ImageDraw, ImageFont
+
+WIDTH = 480
+HEIGHT = 320
+FB = "/dev/fb1"
+
+FONT = "/usr/share/fonts/truetype/noto/NotoSans-Regular.ttf"
+
+def rgb888_to_rgb565(image):
+    pixels = image.load()
+    data = bytearray(WIDTH * HEIGHT * 2)
+
+    i = 0
+    for y in range(HEIGHT):
+        for x in range(WIDTH):
+            r, g, b = pixels[x, y]
+
+            value = ((r >> 3) << 11) | \
+                    ((g >> 2) << 5) | \
+                    (b >> 3)
+
+            data[i] = value & 0xff
+            data[i + 1] = value >> 8
+            i += 2
+
+    return data
+
+
+image = Image.new("RGB", (WIDTH, HEIGHT), "black")
+draw = ImageDraw.Draw(image)
+
+font = ImageFont.truetype(FONT, 100)
+
+text = "HELLO!"
+
+bbox = draw.textbbox((0, 0), text, font=font)
+text_width = bbox[2] - bbox[0]
+text_height = bbox[3] - bbox[1]
+
+x = (WIDTH - text_width) // 2
+y = (HEIGHT - text_height) // 2 - bbox[1]
+
+draw.text(
+    (x, y),
+    text,
+    font=font,
+    fill="white"
+)
+
+with open(FB, "wb") as f:
+    f.write(rgb888_to_rgb565(image))
+
+print("done")
+```
+
 
 ## 3a+ に Osoyoo 3.5 インチ SPI ディスプレイをつなげる
 服や帽子にディスプレイをつけることを思いつき久々のRasPi。
@@ -113,7 +174,7 @@ $ cat /sys/class/graphics/fb1/virtual_size
 - framebuffer: `/dev/fb1`
 
 Python からフレームバッファーに書き込み画面全体を赤くする。
-```
+```python
 import struct
 
 WIDTH = 480
