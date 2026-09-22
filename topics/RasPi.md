@@ -331,8 +331,21 @@ if __name__ == "__main__":
         sys.exit(1)
 
     play_gif(sys.argv[1])
-PY
 ```
+
+```bash
+$ python3 ./lcd_gif_numpy.py gifs/60fps-parrot.gif
+GIF    : gifs/60fps-parrot.gif
+size   : (128, 128)
+frames : 20
+frame=   9  FPS= 18.1
+```
+
+FPS は 17-23 に。まぁまぁよくなった。が、まだ物足りない。まだいけそう。
+
+`Image.Resampling.LANCZOS` から `Image.Resampling.NEAREST` にしてはどうかとのこと。
+元 gif からの変換は怪しいところ。やってみる。
+
 
 
 
